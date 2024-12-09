@@ -6,6 +6,7 @@
 //
 
 import Vapor
+import Fluent
 
 final class AuthMiddleware: AsyncMiddleware {
     func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
@@ -14,9 +15,14 @@ final class AuthMiddleware: AsyncMiddleware {
             throw Abort(.unauthorized, reason: "Missing or invalid token")
         }
         
-        let userId = try await UserToken.find(tokenString, on: request.db)
+        guard let token = try await UserToken.query(on: request.db)
+            .filter(\.$value == tokenString)
+            .with(\.$user)
+            .first() else {
+            throw Abort(.unauthorized, reason: "Invalid token.")
+        }
 
-        request.auth.login(user)
+        request.auth.login(token.user)
 
         return try await next.respond(to: request)
     }
