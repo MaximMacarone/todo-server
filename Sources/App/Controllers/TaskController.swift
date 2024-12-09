@@ -24,7 +24,25 @@ struct TaskController: RouteCollection {
     }
     
     func create(_ req: Request) async throws -> Task {
-        let task = try req.content.decode(Task.self)
+        struct CreateTaskDTO: Content {
+            var title: String
+            var description: String
+            var status: TaskStatus
+        }
+        
+        let data = try req.content.decode(CreateTaskDTO.self)
+        
+        guard let user = req.auth.get(User.self) else {
+            throw Abort(.unauthorized, reason: "User is not authenticated.")
+        }
+        
+        let userId = user.id!
+        
+        let task = try Task(
+            title: data.title,
+            description: data.description,
+            status: data.status,
+            userID: user.requireID())
         try await task.save(on: req.db)
         return task
     }
@@ -37,10 +55,16 @@ struct TaskController: RouteCollection {
     }
     
     func update(_ req: Request) async throws -> Task {
+        struct UpdateTaskDTO: Content {
+            var title: String
+            var description: String
+            var status: TaskStatus
+        }
         guard let task = try await Task.find(req.parameters.get("taskID"), on: req.db) else {
             throw Abort(.notFound)
         }
-        let updatedTask = try req.content.decode(Task.self)
+        let updatedTask = try req.content.decode(UpdateTaskDTO.self)
+        
         task.title = updatedTask.title
         task.description = updatedTask.description
         task.status = updatedTask.status
