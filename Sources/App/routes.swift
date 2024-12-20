@@ -2,7 +2,8 @@ import Fluent
 import Vapor
       
 func routes(_ app: Application) throws {
-
+    
+    let authGroup = app.grouped(AuthMiddleware())
     
     app.post("users") {req async throws -> User in
         let create = try req.content.decode(User.Create.self)

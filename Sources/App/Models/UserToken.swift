@@ -24,6 +24,7 @@ final class UserToken: Model, Content, @unchecked Sendable {
     
     init(id: UUID? = nil, value: String, userID: User.IDValue) {
         self.id = UUID.init(uuidString: value)
+        self.value = value
         self.$user.id = userID
     }
 }

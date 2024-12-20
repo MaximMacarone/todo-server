@@ -17,8 +17,7 @@ public func configure(_ app: Application) async throws {
         database: "vapor_database",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
-    
-    app.middleware.use(AuthMiddleware())
+
 
     app.migrations.add(User.Migration())
     app.migrations.add(UserToken.Migration())
@@ -27,6 +26,8 @@ public func configure(_ app: Application) async throws {
     
     try app.routes.register(collection: TaskController())
     try app.routes.register(collection: CommentController())
+    
+    app.http.server.configuration.hostname = "0.0.0.0"
 
     // register routes
     try routes(app)

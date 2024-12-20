@@ -14,6 +14,7 @@ struct CreateComment: AsyncMigration {
             .field("content", .string, .required)
             .field("taskId", .uuid, .required, .references("tasks", "id"))
             .field("userId", .uuid, .required, .references("users", "id"))
+            .foreignKey("taskId", references: "tasks", .id, onDelete: .cascade)
             .create()
     }
     

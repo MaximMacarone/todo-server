@@ -9,7 +9,8 @@ import Vapor
 
 final class CommentController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
-        let comments = routes.grouped("comments")
+        let authGroup = routes.grouped(AuthMiddleware())
+        let comments = authGroup.grouped("comments")
         comments.get(use: index)
         comments.post(use: create)
         comments.group(":commentID") { comment in
